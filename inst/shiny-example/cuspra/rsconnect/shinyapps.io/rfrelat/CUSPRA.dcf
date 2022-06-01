@@ -1,0 +1,14 @@
+name: CUSPRA
+title: CUSPRA
+username:
+account: rfrelat
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 4440035
+bundleId: 4872034
+url: https://rfrelat.shinyapps.io/CUSPRA/
+when: 1627650170.39765
+lastSyncTime: 1627650170.39766
+asMultiple: FALSE
+asStatic: FALSE
+ignoredFiles: Documentation.md|exLoad.R|comita
