@@ -5,10 +5,10 @@ account: rfrelat
 server: shinyapps.io
 hostUrl: https://api.shinyapps.io/v1
 appId: 4440035
-bundleId: 4872034
+bundleId: 5969060
 url: https://rfrelat.shinyapps.io/CUSPRA/
-when: 1627650170.39765
-lastSyncTime: 1627650170.39766
+when: 1654113930.21206
+lastSyncTime: 1654113930.21208
 asMultiple: FALSE
 asStatic: FALSE
-ignoredFiles: Documentation.md|exLoad.R|comita
+ignoredFiles: Documentation.md
