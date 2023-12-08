@@ -113,9 +113,9 @@ shinyUI(fluidPage(
       h4("Work in progress"),
       strong("Not for distribution!"),
       hr(),
-      p("By Camilla Sguotti, Romain Frelat, Paris Vasilakopoulos, Evangelos Tzanatos, and Christian Möllmann"),
+      p("By Camilla Sguotti, Paris Vasilakopoulos, Evangelos Tzanatos, and Romain Frelat"),
       hr(),
-      div("Last update: 30th May 2022")
+      div("Last update: 8th December 2023")
 
     )
     ),
@@ -124,7 +124,9 @@ shinyUI(fluidPage(
     mainPanel(
       tabsetPanel(
         id = 'out',
-        tabPanel("Dataset", plotOutput("showCUSP", width="600px", height = "500px")),
+        tabPanel("Dataset",
+                 fluidRow(plotOutput("showCUSP", width="600px", height = "500px")),
+                 fluidRow(htmlOutput("evalCUSP"))),
         tabPanel("Simulation", plotOutput("simuPlot", width="600px", height = "500px")),
         tabPanel("Documentation", htmlOutput("renderedReport"))
       )

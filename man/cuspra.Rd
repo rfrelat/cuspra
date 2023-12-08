@@ -4,19 +4,23 @@
 \alias{cuspra}
 \title{Resilience Assessment of the CUSP output}
 \usage{
-cuspra(fitcusp)
+cuspra(fitcusp, walpha = 2, warn = TRUE)
 }
 \arguments{
 \item{fitcusp}{output of the cusp() function}
+
+\item{walpha}{weight of the horizontal distance (default=2). The weight of vertical distance is always 1.}
+
+\item{warn}{define if warnings are shown when the cusp model seems unreliable (default=TRUE)}
 }
 \description{
 This function compute the resilience assessment based
 on the output of cusp function
 }
 \examples{
-data(codnea)
-fitc <- cusp(y ~ Biomass, alpha ~ Fishing,
-            beta ~ Temperature,  data=codnea)
+data(ecosystem_ns)
+fitc <- cusp(y ~ PC1, alpha ~ Fishing,
+            beta ~ Temperature,  data=ecosystem_ns)
 ra <- cuspra(fitc)
 
 }

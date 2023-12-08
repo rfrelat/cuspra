@@ -14,6 +14,8 @@ shinyServer(function(input, output, session) {
     f <- read.table(inFile$datapath, header = input$header,
                     sep = input$sep)
     vars <- names(f)
+    vars <- vars[!tolower(vars)%in%c("year", "yr", "years")]
+
     # Update select input immediately after clicking on the action button.
     updateSelectInput(session, "state","Select State variable",
                       choices = vars, selected = vars[1])
@@ -35,13 +37,13 @@ shinyServer(function(input, output, session) {
     # cusp model#
     fit_community <-  cusp(y ~ y, alpha ~ alpha, beta ~ beta,  data=df)
     # cuspra
-    ra <- cuspra(fit_community)
+    ra <- cuspra(fit_community, warn = FALSE)
 
     # output
 
     layout(matrix(c(1,1,4,1,1,4,2,3,4), ncol=3))
 
-    colpal <- plotRA(ra$cuspRA, fit_community,
+    colpal <- plotra(ra$cuspRA, fit_community,
                                     main="Resilience")
 
     # lines(fit_community$linear.predictors$alpha,
@@ -55,6 +57,20 @@ shinyServer(function(input, output, session) {
     points(1:nrow(df), df$y, pch=15, col=cols)
   })
 
+  output$evalCUSP <- renderUI({
+    req(input$state)
+    f <- info()
+    df <- data.frame("y"=as.numeric(f[,input$state]),
+                     "alpha"=as.numeric(f[,input$stA]),
+                     "beta"=as.numeric(f[,input$stB]))
+    fit_community <-  cusp(y ~ y, alpha ~ alpha, beta ~ beta,  data=df)
+    eval <- evalcusp(fit_community)
+    txt <- c(paste("R2=", round(eval$rsquared,2), " (should be >0.3)"),
+             paste("difference AICc=", round(eval$delta.aicc,1), " (should be >0)"),
+             paste("% points in cusp area=", round(eval$percin,1), " (should be >10)"),
+             paste("p-value of state variable=", round(eval$pval.state,4), " (should be <0.05)"))
+    return(HTML(paste(txt,collapse = '<br/>')))
+  })
 
   output$simuPlot <- renderPlot({
 
@@ -87,14 +103,14 @@ shinyServer(function(input, output, session) {
                 "linear.predictors"=lpred)
 
     #Compute the CUSPRA
-    cuspu <- cuspra(dfu)
+    cuspu <- cuspra(dfu, warn = FALSE)
 
     # set the name of the simulation
     # labru <- paste0("U",u,"_AR",ar1,"_N",r)
 
     layout(matrix(c(1,1,4,1,1,4,2,3,4), ncol=3))
 
-    colpal <- plotRA(cuspu$cuspRA, dfu,
+    colpal <- plotra(cuspu$cuspRA, dfu,
                               main="Resilience")
     lines(dfu$linear.predictors$alpha,
           dfu$linear.predictors$beta, col="darkgrey", lty=3)
@@ -107,11 +123,9 @@ shinyServer(function(input, output, session) {
     cols <- as.character(cut(cuspu$cuspRA, colpal$bk, colpal$pal))
     plot(1:input$nstep, ts_y, type="l", main="Simulated state", ylab="")
     points(1:input$nstep, ts_y, pch=15, col=cols)
-
   })
 
   output$renderedReport <- renderUI({
-    #includeMarkdown('Documentation.md')
     includeHTML('Documentation.html')
   })
 })

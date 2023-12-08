@@ -9,16 +9,16 @@
 #' @param main title of the plot
 #' @param ... other arguments sent to plotCuspBifurcation
 #' @keywords resilience assessment
+#' @import graphics
 #' @export
 #' @examples
-#' data(codnea)
-#' fitc <- cusp(y ~ Biomass, alpha ~ Fishing,
-#'             beta ~ Temperature,  data=codnea)
+#' data(ecosystem_ns)
+#' fitc <- cusp(y ~ PC1, alpha ~ Fishing,
+#'             beta ~ Temperature,  data=ecosystem_ns)
 #' ra <- cuspra(fitc)
-#' plotRA(ra$cuspRA, fitc)
+#' plotra(ra$cuspRA, fitc)
 #'
-#Visualisation function
-plotRA <- function(var, fitcusp,
+plotra <- function(var, fitcusp,
                         pal = rev(grDevices::terrain.colors(11))[-1],
                         main = "",
                         ...){

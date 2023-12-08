@@ -3,15 +3,34 @@
 #' This function compute the resilience assessment based
 #' on the output of cusp function
 #' @param fitcusp output of the cusp() function
+#' @param walpha weight of the horizontal distance (default=2). The weight of vertical distance is always 1.
+#' @param warn define if warnings are shown when the cusp model seems unreliable (default=TRUE)
 #' @keywords resilience assessment
 #' @export
 #' @examples
-#' data(codnea)
-#' fitc <- cusp(y ~ Biomass, alpha ~ Fishing,
-#'             beta ~ Temperature,  data=codnea)
+#' data(ecosystem_ns)
+#' fitc <- cusp(y ~ PC1, alpha ~ Fishing,
+#'             beta ~ Temperature,  data=ecosystem_ns)
 #' ra <- cuspra(fitc)
 #'
-cuspra <- function(fitcusp){
+cuspra <- function(fitcusp, walpha=2, warn = TRUE){
+  # warnings on CUSP validity
+  if (warn){
+    efit <- evalcusp(fitcusp)
+    if (efit$rsquared<0.3){
+      warning("The pseudo R.squared of the cusp model is abnormally low.")
+    }
+    if (efit$delta.aicc<0){
+      warning("The cusp model do not pass the AICc test.")
+    }
+    if (efit$percin<10){
+      warning("Less than 10% of points are in the cusp area.")
+    }
+    if (efit$pval.state>0.05){
+      warning("The p-value of the state variable is not significant.")
+    }
+  }
+
   # vertical distance with to one vs two state
   beta <- fitcusp$linear.predictors[, "beta"]
   dbeta <- - beta
@@ -23,7 +42,7 @@ cuspra <- function(fitcusp){
 
   #Resilience
   #sum of the distances
-  sumd <- (2*dalpha + dbeta)/3
+  sumd <- (walpha*dalpha + dbeta)/(walpha+1)
   # between 0 and 1
   cuspRA <- (tanh(sumd)+1)/2
 
@@ -33,3 +52,4 @@ cuspra <- function(fitcusp){
                     "sumd"=sumd)
   return(res)
 }
+
