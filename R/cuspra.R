@@ -5,6 +5,13 @@
 #' @param fitcusp output of the cusp() function
 #' @param walpha weight of the horizontal distance (default=2). The weight of vertical distance is always 1.
 #' @param warn define if warnings are shown when the cusp model seems unreliable (default=TRUE)
+#' @return A data.frame with
+#' \describe{
+#'   \item{cuspRA}{the resilience assessment, with values between 0 (low resilience) and 1 (high resilience)}
+#'   \item{dalpha}{the horizontal component as distance to the cusp area (if negative, the point is inside the cusp area)}
+#'   \item{dbeta}{the vertical component as distance to linearity (if negative the system is discontinuous)}
+#'   \item{sumd}{the weighted average of the horizontal and vertical components (by default the horizontal component has double weight, walpha=2)}
+#' }
 #' @keywords resilience assessment
 #' @export
 #' @examples

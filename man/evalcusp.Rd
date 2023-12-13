@@ -13,7 +13,7 @@ evalcusp(fitcusp)
 A data.frame with
 \describe{
   \item{rsquared}{the pseudo R2 of the cusp model (should be >0.3)}
-  \item{delta.aicc}{the difference between AICc of the linear and cusp model (should be >0)}
+  \item{delta.aicc}{the minimum difference between AICc of the linear model and cusp model (should be >0)}
   \item{percin}{percentage of points within the cusp area (should be >10)}
   \item{pval.state}{p-value of the state variable (should be <0.05)}
 }

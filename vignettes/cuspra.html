@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+
+<meta name="author" content="Romain Frelat" />
+
+<meta name="date" content="2023-12-13" />
+
+<title>Run cuspra on empirical data</title>
+
+<script>// Pandoc 2.9 adds attributes on both header and div. We remove the former (to
+// be compatible with the behavior of Pandoc < 2.8).
+document.addEventListener('DOMContentLoaded', function(e) {
+  var hs = document.querySelectorAll("div.section[class*='level'] > :first-child");
+  var i, h, a;
+  for (i = 0; i < hs.length; i++) {
+    h = hs[i];
+    if (!/^h[1-6]$/i.test(h.tagName)) continue;  // it should be a header h1-h6
+    a = h.attributes;
+    while (a.length > 0) h.removeAttribute(a[0].name);
+  }
+});
+</script>
+
+<style type="text/css">
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+span.underline{text-decoration: underline;}
+div.column{display: inline-block; vertical-align: top; width: 50%;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+</style>
+
+
+
+<style type="text/css">
+code {
+white-space: pre;
+}
+.sourceCode {
+overflow: visible;
+}
+</style>
+<style type="text/css" data-origin="pandoc">
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+{ counter-reset: source-line 0; }
+pre.numberSource code > span
+{ position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+{ content: counter(source-line);
+position: relative; left: -1em; text-align: right; vertical-align: baseline;
+border: none; display: inline-block;
+-webkit-touch-callout: none; -webkit-user-select: none;
+-khtml-user-select: none; -moz-user-select: none;
+-ms-user-select: none; user-select: none;
+padding: 0 4px; width: 4em;
+color: #aaaaaa;
+}
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa; padding-left: 4px; }
+div.sourceCode
+{ }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } 
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.at { color: #7d9029; } 
+code span.bn { color: #40a070; } 
+code span.bu { color: #008000; } 
+code span.cf { color: #007020; font-weight: bold; } 
+code span.ch { color: #4070a0; } 
+code span.cn { color: #880000; } 
+code span.co { color: #60a0b0; font-style: italic; } 
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.do { color: #ba2121; font-style: italic; } 
+code span.dt { color: #902000; } 
+code span.dv { color: #40a070; } 
+code span.er { color: #ff0000; font-weight: bold; } 
+code span.ex { } 
+code span.fl { color: #40a070; } 
+code span.fu { color: #06287e; } 
+code span.im { color: #008000; font-weight: bold; } 
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.kw { color: #007020; font-weight: bold; } 
+code span.op { color: #666666; } 
+code span.ot { color: #007020; } 
+code span.pp { color: #bc7a00; } 
+code span.sc { color: #4070a0; } 
+code span.ss { color: #bb6688; } 
+code span.st { color: #4070a0; } 
+code span.va { color: #19177c; } 
+code span.vs { color: #4070a0; } 
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } 
+</style>
+<script>
+// apply pandoc div.sourceCode style to pre.sourceCode instead
+(function() {
+  var sheets = document.styleSheets;
+  for (var i = 0; i < sheets.length; i++) {
+    if (sheets[i].ownerNode.dataset["origin"] !== "pandoc") continue;
+    try { var rules = sheets[i].cssRules; } catch (e) { continue; }
+    var j = 0;
+    while (j < rules.length) {
+      var rule = rules[j];
+      // check if there is a div.sourceCode rule
+      if (rule.type !== rule.STYLE_RULE || rule.selectorText !== "div.sourceCode") {
+        j++;
+        continue;
+      }
+      var style = rule.style.cssText;
+      // check if color or background-color is set
+      if (rule.style.color === '' && rule.style.backgroundColor === '') {
+        j++;
+        continue;
+      }
+      // replace div.sourceCode by a pre.sourceCode rule
+      sheets[i].deleteRule(j);
+      sheets[i].insertRule('pre.sourceCode{' + style + '}', j);
+    }
+  }
+})();
+</script>
+
+
+
+
+<style type="text/css">body {
+background-color: #fff;
+margin: 1em auto;
+max-width: 700px;
+overflow: visible;
+padding-left: 2em;
+padding-right: 2em;
+font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+font-size: 14px;
+line-height: 1.35;
+}
+#TOC {
+clear: both;
+margin: 0 0 10px 10px;
+padding: 4px;
+width: 400px;
+border: 1px solid #CCCCCC;
+border-radius: 5px;
+background-color: #f6f6f6;
+font-size: 13px;
+line-height: 1.3;
+}
+#TOC .toctitle {
+font-weight: bold;
+font-size: 15px;
+margin-left: 5px;
+}
+#TOC ul {
+padding-left: 40px;
+margin-left: -1.5em;
+margin-top: 5px;
+margin-bottom: 5px;
+}
+#TOC ul ul {
+margin-left: -2em;
+}
+#TOC li {
+line-height: 16px;
+}
+table {
+margin: 1em auto;
+border-width: 1px;
+border-color: #DDDDDD;
+border-style: outset;
+border-collapse: collapse;
+}
+table th {
+border-width: 2px;
+padding: 5px;
+border-style: inset;
+}
+table td {
+border-width: 1px;
+border-style: inset;
+line-height: 18px;
+padding: 5px 5px;
+}
+table, table th, table td {
+border-left-style: none;
+border-right-style: none;
+}
+table thead, table tr.even {
+background-color: #f7f7f7;
+}
+p {
+margin: 0.5em 0;
+}
+blockquote {
+background-color: #f6f6f6;
+padding: 0.25em 0.75em;
+}
+hr {
+border-style: solid;
+border: none;
+border-top: 1px solid #777;
+margin: 28px 0;
+}
+dl {
+margin-left: 0;
+}
+dl dd {
+margin-bottom: 13px;
+margin-left: 13px;
+}
+dl dt {
+font-weight: bold;
+}
+ul {
+margin-top: 0;
+}
+ul li {
+list-style: circle outside;
+}
+ul ul {
+margin-bottom: 0;
+}
+pre, code {
+background-color: #f7f7f7;
+border-radius: 3px;
+color: #333;
+white-space: pre-wrap; 
+}
+pre {
+border-radius: 3px;
+margin: 5px 0px 10px 0px;
+padding: 10px;
+}
+pre:not([class]) {
+background-color: #f7f7f7;
+}
+code {
+font-family: Consolas, Monaco, 'Courier New', monospace;
+font-size: 85%;
+}
+p > code, li > code {
+padding: 2px 0px;
+}
+div.figure {
+text-align: center;
+}
+img {
+background-color: #FFFFFF;
+padding: 2px;
+border: 1px solid #DDDDDD;
+border-radius: 3px;
+border: 1px solid #CCCCCC;
+margin: 0 5px;
+}
+h1 {
+margin-top: 0;
+font-size: 35px;
+line-height: 40px;
+}
+h2 {
+border-bottom: 4px solid #f7f7f7;
+padding-top: 10px;
+padding-bottom: 2px;
+font-size: 145%;
+}
+h3 {
+border-bottom: 2px solid #f7f7f7;
+padding-top: 10px;
+font-size: 120%;
+}
+h4 {
+border-bottom: 1px solid #f7f7f7;
+margin-left: 8px;
+font-size: 105%;
+}
+h5, h6 {
+border-bottom: 1px solid #ccc;
+font-size: 105%;
+}
+a {
+color: #0033dd;
+text-decoration: none;
+}
+a:hover {
+color: #6666ff; }
+a:visited {
+color: #800080; }
+a:visited:hover {
+color: #BB00BB; }
+a[href^="http:"] {
+text-decoration: underline; }
+a[href^="https:"] {
+text-decoration: underline; }
+
+code > span.kw { color: #555; font-weight: bold; } 
+code > span.dt { color: #902000; } 
+code > span.dv { color: #40a070; } 
+code > span.bn { color: #d14; } 
+code > span.fl { color: #d14; } 
+code > span.ch { color: #d14; } 
+code > span.st { color: #d14; } 
+code > span.co { color: #888888; font-style: italic; } 
+code > span.ot { color: #007020; } 
+code > span.al { color: #ff0000; font-weight: bold; } 
+code > span.fu { color: #900; font-weight: bold; } 
+code > span.er { color: #a61717; background-color: #e3d2d2; } 
+</style>
+
+
+
+
+</head>
+
+<body>
+
+
+
+
+<h1 class="title toc-ignore">Run cuspra on empirical data</h1>
+<h4 class="author">Romain Frelat</h4>
+<h4 class="date">2023-12-13</h4>
+
+
+
+<p>These are short explanations on how to use CUSPRA on empirical
+dataset, as explained in Sguotti et al. 2024, <em>Resilience assessment
+in complex natural systems</em> (in review).</p>
+<div id="load-package-and-dataset" class="section level2">
+<h2>1. Load package and dataset</h2>
+<p>Load the <code>cusp</code> and <code>cuspra</code> R packages. To
+make sure that you have the last version of the package, you can run
+<code>devtools::install_github(repo = &quot;rfrelat/cuspra&quot;, dependencies = TRUE, build_vignettes = TRUE)</code>.</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a><span class="fu">library</span>(cusp)</span>
+<span id="cb1-2"><a href="#cb1-2" tabindex="-1"></a><span class="fu">library</span>(cuspra)</span></code></pre></div>
+<p>Let’s now load the dataset:</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" tabindex="-1"></a><span class="fu">data</span>(<span class="st">&quot;ecosystem_ns&quot;</span>)</span>
+<span id="cb2-2"><a href="#cb2-2" tabindex="-1"></a><span class="co"># or </span></span>
+<span id="cb2-3"><a href="#cb2-3" tabindex="-1"></a><span class="co"># data(&quot;fishtraits_med&quot;)</span></span>
+<span id="cb2-4"><a href="#cb2-4" tabindex="-1"></a><span class="co"># data(&quot;cod_nea&quot;) </span></span></code></pre></div>
+<p>If you use another dataset, make sure to change the name of the
+object in the cusp() model with the correct name of columns
+(e.g. <code>PC1</code> should be replaced by <code>Biomass</code> if you
+are using the <code>cod_nea</code> dataset).</p>
+</div>
+<div id="fit-the-cusp-model" class="section level2">
+<h2>2. Fit the cusp model</h2>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" tabindex="-1"></a>fitNS <span class="ot">&lt;-</span> <span class="fu">cusp</span>(y <span class="sc">~</span> PC1, alpha <span class="sc">~</span> Fishing,</span>
+<span id="cb3-2"><a href="#cb3-2" tabindex="-1"></a>             beta <span class="sc">~</span> Temperature,  <span class="at">data=</span>ecosystem_ns)</span>
+<span id="cb3-3"><a href="#cb3-3" tabindex="-1"></a><span class="co"># Make sure to check the model results</span></span>
+<span id="cb3-4"><a href="#cb3-4" tabindex="-1"></a><span class="co"># with summary(), evalcusp(), or visually with plot()</span></span>
+<span id="cb3-5"><a href="#cb3-5" tabindex="-1"></a><span class="fu">evalcusp</span>(fitNS)</span>
+<span id="cb3-6"><a href="#cb3-6" tabindex="-1"></a><span class="co">#&gt;    rsquared delta.aicc   percin   pval.state</span></span>
+<span id="cb3-7"><a href="#cb3-7" tabindex="-1"></a><span class="co">#&gt; 1 0.8847192   61.91278 41.37931 1.321463e-33</span></span></code></pre></div>
+<p>Make sure to check the model results with
+<code>summary(fitNS)</code>, <code>plot(fitNS)</code> and/or
+<code>evalcusp(fitNS)</code>. The output of <code>evalcusp()</code>
+shows: - <code>rsquared</code>: the pseudo R2 of the cusp model
+(<strong>should be &gt;0.3</strong>)} - <code>delta.aicc</code>: the
+difference between AICc of the linear and cusp model (<strong>should be
+&gt;0</strong>)} - <code>percin</code>: percentage of points within the
+cusp area (<strong>should be &gt;10</strong>)} -
+<code>pval.state</code>: p-value of the state variable (<strong>should
+be &lt;0.05</strong>)}</p>
+</div>
+<div id="estimate-the-resilience" class="section level2">
+<h2>3. Estimate the resilience</h2>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" tabindex="-1"></a>raNS <span class="ot">&lt;-</span> <span class="fu">cuspra</span>(fitNS)</span></code></pre></div>
+<p>The output of the cusp resilience assessment provide 4 columns: -
+cuspRA: the resilience assessment, with values between 0 (low
+resilience) and 1 (high resilience) - dalpha: the horizontal component
+as distance to the cusp area (if negative, the point is inside the cusp
+area) - dbeta: the vertical component as distance to linearity (if
+negative the system is discontinuous) - sumd: the weighted average of
+the horizontal and vertical components (by default the horizontal
+component has double weight)</p>
+</div>
+<div id="visualize-the-results" class="section level2">
+<h2>4. Visualize the results</h2>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" tabindex="-1"></a><span class="fu">layout</span>(<span class="fu">matrix</span>(<span class="fu">c</span>(<span class="dv">2</span>,<span class="dv">1</span>,<span class="dv">1</span>), <span class="at">ncol=</span><span class="dv">1</span>))</span>
+<span id="cb5-2"><a href="#cb5-2" tabindex="-1"></a>pal <span class="ot">&lt;-</span> <span class="fu">plotra</span>(raNS<span class="sc">$</span>cuspRA, fitNS)</span>
+<span id="cb5-3"><a href="#cb5-3" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mar=</span><span class="fu">c</span>(<span class="dv">2</span>,<span class="dv">4</span>,<span class="dv">1</span>,<span class="dv">1</span>))</span>
+<span id="cb5-4"><a href="#cb5-4" tabindex="-1"></a><span class="fu">plot</span>(ecosystem_ns<span class="sc">$</span>Year, ecosystem_ns<span class="sc">$</span>PC1, <span class="at">pch=</span><span class="dv">16</span>,</span>
+<span id="cb5-5"><a href="#cb5-5" tabindex="-1"></a>     <span class="at">ylab=</span><span class="st">&quot;State variable&quot;</span>, <span class="at">type=</span><span class="st">&quot;b&quot;</span>,</span>
+<span id="cb5-6"><a href="#cb5-6" tabindex="-1"></a>     <span class="at">col=</span><span class="fu">as.character</span>(<span class="fu">cut</span>(raNS<span class="sc">$</span>cuspRA, <span class="at">breaks =</span> pal<span class="sc">$</span>bk, <span class="at">labels =</span> pal<span class="sc">$</span>pal)))</span></code></pre></div>
+<p><img src="data:image/png;base64,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" /><!-- --></p>
+</div>
+
+
+
+<!-- code folding -->
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>
