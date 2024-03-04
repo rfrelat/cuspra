@@ -9,12 +9,12 @@ lpred <- data.frame("alpha"=rep(alp, length(bet)),
 
 #Add y value (no effect on cuspra value)
 fit1 <- list("y"=1,
-                "linear.predictors"=lpred)
+             "linear.predictors"=lpred)
 test1 <- cuspra(fit1, warn=FALSE)
 
 par(mfrow=c(2,2), mar=c(4,4,1,1), oma=c(0,1,0,0))
 colpal <- plotra(test1$cuspRA, fit1,
-                          main="Resilience")
+                 main="Resilience")
 boxplot(test1$cuspRA, ylab="Resilience")
 xseq <- colpal$bk
 rect(0, xseq[-length(xseq)], 0.5, xseq[-1],
@@ -43,35 +43,35 @@ drawplot <- FALSE
 resSimu <- list() #list to store all simulations
 for (u in useq){
   for (r in 1:nrep){
-
+    
     # Create alpha sequences
     ts_alpha <- as.numeric(arima.sim(n=nstep, list(ar=ar1)))
     # Create beta sequences
     ts_beta <- rnorm(nstep, u, sd = 0.5)
-
+    
     # Simulate cusp state variable based on alpha and beta
     ts_y <- Vectorize(rcusp)(1, ts_alpha, ts_beta)
-
+    
     # Organize the simulated data in data. frame
     lpred <- data.frame("alpha"=ts_alpha,
                         "beta"=ts_beta)
-
+    
     dfu <- list("y"=ts_y,
                 "linear.predictors"=lpred)
-
+    
     #Compute the CUSPRA
     cuspu <- cuspra(dfu, warn=FALSE)
-
+    
     #set the name of the simulation
     labru <- paste0("U",u,"_AR",ar1,"_N",r)
-
+    
     #save the simulation in the list resSimu
     resSimu[[labru]] <- cbind(ts_alpha, ts_beta, ts_y, cuspu)
-
+    
     #Plot
     if(drawplot){
       layout(matrix(c(1,1,4,1,1,4,2,3,4), ncol=3))
-
+      
       colpal <- plotra(cuspu$cuspRA, dfu,
                        main="Resilience")
       lines(dfu$linear.predictors$alpha,
@@ -149,62 +149,79 @@ per_freq <- 5 #number of period per time series
 per_noise <- 0.3 #level of noise on the periodic variable
 u0 <- 2 # high level of discontinuity
 nrep <- 100 # number of repetitions
+# parameter for chaotic time series
+c <- 3.9   # Control parameter (typically in the range [3.57, 4])
+x <- 0.5
 
 resTest <- list() #list to store all simulations
 for (r in 1:nrep){
-
-    # Create alpha sequences
-    ts_alpha <- as.numeric(arima.sim(n=nstep, list(ar=ar1)))
-    # Create beta sequences
-    ts_beta <- rnorm(nstep, u0, sd = 0.5)
-
-    # Simulate cusp state variable based on alpha and beta
-    ts_y0 <- Vectorize(rcusp)(1, ts_alpha, ts_beta)
-    # Simulate random periodic state variable
-    ts_y1 <- sin(1:nstep/nstep*2*pi*per_freq)+rnorm(nstep, 0, sd = per_noise)
-    # Simulate random state variable
-    ts_y2 <- rnorm(nstep, 0, sd = 1)
-
-    df0 <- list("y"=ts_y0,
-                "alpha"=ts_alpha,
-                "beta"=ts_beta)
-    df1 <- list("y"=ts_y1,
-                "alpha"=ts_alpha,
-                "beta"=ts_beta)
-    df2 <- list("y"=ts_y2,
-                "alpha"=ts_alpha,
-                "beta"=ts_beta)
-
-    fit_0 <- cusp(y ~ y, alpha ~alpha, beta ~ beta,  data=df0)
-    efit0 <- evalcusp(fit_0)
-    pval0 <- chi2pvalue(fit_0)
-
-    fit_1 <- cusp(y ~ y, alpha ~alpha, beta ~ beta,  data=df1)
-    efit1 <- evalcusp(fit_1)
-    pval1 <- chi2pvalue(fit_1)
-
-    fit_2 <- cusp(y ~ y, alpha ~alpha, beta ~ beta,  data=df2)
-    efit2 <- evalcusp(fit_2)
-    pval2 <- chi2pvalue(fit_2)
-
-    #save the simulation in the list resSimu
-    new <- data.frame("sim"=c("cusp","periodic","random"),
-                      "r2"=c(efit0$rsquared, efit1$rsquared, efit2$rsquared),
-                      "deltaAIC"=c(efit0$delta.aicc, efit1$delta.aicc, efit2$delta.aicc),
-                      "percin"=c(efit0$percin, efit1$percin, efit2$percin),
-                      "pvalstate"=c(efit0$pval.state, efit1$pval.state, efit2$pval.state),
-                      "pvalmodel"=c(pval0$pvalue, pval1$pvalue, pval2$pvalue))
-
-    resTest <- rbind(resTest, new)
+  
+  # Create alpha sequences
+  ts_alpha <- as.numeric(arima.sim(n=nstep, list(ar=ar1)))
+  # Create beta sequences
+  ts_beta <- rnorm(nstep, u0, sd = 0.5)
+  
+  # Simulate cusp state variable based on alpha and beta
+  ts_y0 <- Vectorize(rcusp)(1, ts_alpha, ts_beta)
+  # Simulate random periodic state variable
+  ts_y1 <- sin(1:nstep/nstep*2*pi*per_freq)+rnorm(nstep, 0, sd = per_noise)
+  # Simulate random state variable
+  ts_y2 <- rnorm(nstep, 0, sd = 1)
+  #simulate chaotic time series using logistic map 
+  ts_y3 <- c()
+  for (i in 1:nstep) {
+    x <- c * x * (1 - x)
+    ts_y3[i] <- x
+  }
+  
+  df0 <- list("y"=ts_y0,
+              "alpha"=ts_alpha,
+              "beta"=ts_beta)
+  df1 <- list("y"=ts_y1,
+              "alpha"=ts_alpha,
+              "beta"=ts_beta)
+  df2 <- list("y"=ts_y2,
+              "alpha"=ts_alpha,
+              "beta"=ts_beta)
+  df3 <- list("y"=ts_y3,
+              "alpha"=ts_alpha,
+              "beta"=ts_beta)
+  
+  fit_0 <- cusp(y ~ y, alpha ~alpha, beta ~ beta,  data=df0)
+  efit0 <- evalcusp(fit_0)
+  pval0 <- chi2pvalue(fit_0)
+  
+  fit_1 <- cusp(y ~ y, alpha ~alpha, beta ~ beta,  data=df1)
+  efit1 <- evalcusp(fit_1)
+  pval1 <- chi2pvalue(fit_1)
+  
+  fit_2 <- cusp(y ~ y, alpha ~alpha, beta ~ beta,  data=df2)
+  efit2 <- evalcusp(fit_2)
+  pval2 <- chi2pvalue(fit_2)
+  
+  fit_3 <- cusp(y ~ y, alpha ~alpha, beta ~ beta,  data=df3)
+  efit3 <- evalcusp(fit_3)
+  pval3 <- chi2pvalue(fit_3)
+  
+  #save the simulation in the list resSimu
+  new <- data.frame("sim"=c("cusp","periodic","random","chaotic"),
+                    "r2"=c(efit0$rsquared, efit1$rsquared, efit2$rsquared,efit3$rsquared),
+                    "deltaAIC"=c(efit0$delta.aicc, efit1$delta.aicc, efit2$delta.aicc,efit3$delta.aicc),
+                    "percin"=c(efit0$percin, efit1$percin, efit2$percin,efit3$percin),
+                    "pvalstate"=c(efit0$pval.state, efit1$pval.state, efit2$pval.state,efit3$pval.state),
+                    "pvalmodel"=c(pval0$pvalue, pval1$pvalue, pval2$pvalue,pval3$pvalue))
+  
+  resTest <- rbind(resTest, new)
 }
 
 
-par(mfrow=c(5,1), mar=c(2,4,1,1))
+par(mfrow=c(6,1), mar=c(2,4,1,1))
 plot(1:nstep, ts_alpha, type="l", main="Alpha", ylab="Alpha")
 plot(1:nstep, ts_beta, type="l", main="Beta", ylab="Beta")
 plot(1:nstep, ts_y0, type="l", main="Cusp simulation", ylab="Cusp simulated state")
 plot(1:nstep, ts_y1, type="l", main="Periodic simulation", ylab="Periodic simulated state")
 plot(1:nstep, ts_y2, type="l", main="Random simulation", ylab="Random simulated state")
+plot(1:nstep, ts_y3, type="l", main="Chaotic simulation", ylab="Random simulated state")
 
 
 
@@ -229,4 +246,3 @@ abline(h=0.05, lwd=2, lty=3, col="red")
 # see the test results
 table(resTest$deltaAIC>0 &resTest$r2>0.3 &resTest$percin >=10 & resTest$pvalstate<0.05,
       resTest$sim)
-
