@@ -1,0 +1,14 @@
+bibentry(
+  bibtype  = "Article",
+  title    = "Resilience assessment in complex natural systems",
+  author   = c(person("C.", "Sguotti"),
+               person("P.", "Vasilakopoulos"),
+               person("E.", "Tzanatos"),
+               person("R.", "Frelat")),
+  journal  = "Proceedings of the Royal Society B",
+  year     = "2024",
+  volume   = "291",
+  number   = "20240089",
+  pages    = "",
+  doi      = "10.1098/rspb.2024.0089"
+)

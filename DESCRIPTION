@@ -1,7 +1,7 @@
 Package: cuspra
 Type: Package
 Title: Cusp Resilience Assessment
-Version: 0.1.0
+Version: 1.0
 Author: Romain Frelat and Camilla Sguotti
 Maintainer: Romain Frelat <rom.frelat@gmail.com>
 Description: Quantify resilience based on empirical data using the stochastic cusp model to integrate multiple drivers and their interactions.

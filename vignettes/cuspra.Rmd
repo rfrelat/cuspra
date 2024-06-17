@@ -17,7 +17,7 @@ knitr::opts_chunk$set(
 ```
 
 
-These are short explanations on how to use CUSPRA on empirical dataset, as explained in Sguotti et al. 2024, *Resilience assessment in complex natural systems* (in review).
+These are short explanations on how to use CUSPRA on empirical dataset, as introduced in Sguotti et al. (2024) "Resilience assessment in complex natural systems" *Proc. R. Soc. B.* 291:20240089 doi [10.1098/rspb.2024.0089](http://doi.org/10.1098/rspb.2024.0089)
 
 
 ## 1. Load package and dataset
